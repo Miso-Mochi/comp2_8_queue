@@ -34,38 +34,109 @@ void finalize(QUEUE* q)
 // valの値をキューに入れる。実行の成否を返す
 bool enqueue(QUEUE* q, int val)
 {
-	// ToDo: valのデータをキューに追加します
-	// 上手くいかない場合にはfalseを返します
-	// メモリを使い切ったら先頭アドレスに戻って追加して下さい
+	if (q == NULL || q->memory_begin == NULL) 
+		return false;
 
-	return false;
+	int max = getMaxCount(q);
+	if (max <= 0) 
+		return false;
+
+	int wrong = countQueuedElements(q);
+	int used = (max - wrong) % max;
+	int free_space = max - used - 1;
+
+	if (free_space <= 0) 
+		return false;
+
+	*(q->tail) = val;
+	q->tail++;
+	if (q->tail >= q->memory_end)
+		q->tail = q->memory_begin;
+
+	return true;
 }
 
 
 // addrから始まるnum個の整数をキューに入れる。実行の成否を返す
 bool enqueue_array(QUEUE* q, int* addr, int num)
 {
-	// ToDo: addrからnum個のデータをキューに追加します
-	// 上手くいかない場合にはfalseを返します
-	// メモリを使い切ったら先頭アドレスに戻って追加して下さい
+	if (q == NULL || q->memory_begin == NULL) return false;
+	if (addr == NULL) return false;
+	if (num <= 0) return false;
 
-	return false;
+	int max = getMaxCount(q);
+	if (max <= 0) return false;
+
+	int wrong = countQueuedElements(q);
+	int used = (max - wrong) % max;
+	int free_space = max - used - 1;
+
+	if (free_space < num) return false;
+
+	for (int i = 0; i < num; i++) {
+		*(q->tail) = addr[i];
+		q->tail++;
+		if (q->tail >= q->memory_end) q->tail = q->memory_begin;
+	}
+
+	return true;
 }
 
 // キューから一つの要素を取り出す(不具合時は0を返す)
 int dequeue(QUEUE* q)
 {
-	// ToDo: 先頭のデータを返します
+	if (q == NULL || q->memory_begin == NULL)
+		return 0;
 
-	return 0;
+	int max = getMaxCount(q);
+	if (max <= 0)
+		return 0;
+
+	int wrong = countQueuedElements(q);
+	int used = (max - wrong) % max;
+
+	if (used <= 0)
+		return 0;
+
+	int val = *(q->head);
+	q->head++;
+	if (q->head >= q->memory_end) 
+		q->head = q->memory_begin;
+
+	return val;
 }
 
 // addrにキューからnumの要素を取り出す。取り出せた個数を返す
 int dequeue_array(QUEUE* q, int* addr, int num)
 {
-	// ToDo: 先頭からnum個のデータをaddrに格納します
+	if (q == NULL || q->memory_begin == NULL)
+		return 0;
+	if (addr == NULL) 
+		return 0;
+	if (num <= 0) 
+		return 0;
 
-	return 0;
+	int max = getMaxCount(q);
+	if (max <= 0) 
+		return 0;
+
+	int wrong = countQueuedElements(q);
+	int used = (max - wrong) % max;
+
+	if (used <= 0)
+		return 0;
+
+	int got = 0;
+	for (int i = 0; i < num && got < used; i++)
+	{
+		addr[got] = *(q->head);
+		q->head++;
+		if (q->head >= q->memory_end)
+			q->head = q->memory_begin;
+		got++;
+	}
+
+	return got;
 }
 
 // キューが空かどうかを調べる
